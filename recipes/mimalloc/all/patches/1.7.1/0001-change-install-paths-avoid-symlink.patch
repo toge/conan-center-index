@@ -1,0 +1,40 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index f708e75..fe46a5d 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -210,7 +210,7 @@ endif()
+ if (MI_INSTALL_TOPLEVEL)
+   set(mi_install_dir "${CMAKE_INSTALL_PREFIX}")
+ else()
+-  set(mi_install_dir "${CMAKE_INSTALL_PREFIX}/lib/mimalloc-${mi_version}")
++  set(mi_install_dir ".")
+ endif()
+ 
+ if(MI_SECURE)
+@@ -277,7 +277,7 @@ if(MI_BUILD_SHARED)
+         LIBRARY DESTINATION lib
+         ARCHIVE DESTINATION lib)
+   else()
+-    install(TARGETS mimalloc EXPORT mimalloc DESTINATION ${mi_install_dir} LIBRARY)
++    install(TARGETS mimalloc EXPORT mimalloc RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+   endif()
+   install(EXPORT mimalloc DESTINATION ${mi_install_dir}/cmake)
+ endif()
+@@ -302,7 +302,7 @@ if (MI_BUILD_STATIC)
+     set_target_properties(mimalloc-static PROPERTIES OUTPUT_NAME ${mi_basename})
+   endif()
+ 
+-  install(TARGETS mimalloc-static EXPORT mimalloc DESTINATION ${mi_install_dir})
++  install(TARGETS mimalloc-static EXPORT mimalloc RUNTIME DESTINATION bin LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
+ endif()
+ 
+ # install include files
+@@ -312,7 +312,7 @@ install(FILES include/mimalloc-new-delete.h DESTINATION ${mi_install_dir}/includ
+ install(FILES cmake/mimalloc-config.cmake DESTINATION ${mi_install_dir}/cmake)
+ install(FILES cmake/mimalloc-config-version.cmake DESTINATION ${mi_install_dir}/cmake)
+ 
+-if(NOT WIN32 AND MI_BUILD_SHARED AND NOT MI_INSTALL_TOPLEVEL)
++if(FALSE)
+   # install a symlink in the /usr/local/lib to the versioned library
+   set(mi_symlink "${CMAKE_SHARED_MODULE_PREFIX}${mi_basename}${CMAKE_SHARED_LIBRARY_SUFFIX}")
+   set(mi_soname "mimalloc-${mi_version}/${mi_symlink}.${mi_version}")
