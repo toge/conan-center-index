@@ -1,5 +1,20 @@
 #include <iostream>
 #include <cassert>
+
+#ifndef __cpp_lib_span
+#include <gsl/span>
+#endif
+
+// wait for v1.2.2
+namespace uuids {
+    class uuid;
+
+   template<class CharT = char,
+            class Traits = std::char_traits<CharT>,
+            class Allocator = std::allocator<CharT>>
+   inline std::basic_string<CharT, Traits, Allocator> to_string(uuid const & id);
+}
+
 #include "uuid.h"
 
 using namespace uuids;
@@ -14,7 +29,13 @@ int main() {
     }
 
     {
-        uuid const guid = uuids::uuid_random_generator{}();
+        std::random_device rd;
+        auto seed_data = std::array<int, std::mt19937::state_size> {};
+        std::generate(std::begin(seed_data), std::end(seed_data), std::ref(rd));
+        std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
+        std::mt19937 generator(seq);
+
+        uuid const guid = uuids::uuid_random_generator{generator}();
         assert(!guid.is_nil());
         assert(guid.size() == 16);
         assert(guid.version() == uuids::uuid_version::random_number_based);
