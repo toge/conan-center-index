@@ -4,24 +4,11 @@
 #ifndef __cpp_lib_span
 #include <gsl/span>
 #endif
-
-// wait for v1.2.2
-namespace uuids {
-    class uuid;
-
-   template<class CharT = char,
-            class Traits = std::char_traits<CharT>,
-            class Allocator = std::allocator<CharT>>
-   inline std::basic_string<CharT, Traits, Allocator> to_string(uuid const & id);
-}
-
 #include "uuid.h"
 
-using namespace uuids;
 using namespace std::string_literals;
 
 int main() {
-
     {
         auto str = "47183823-2574-4bfd-b411-99ed177d3e43"s;
         auto guid = uuids::uuid::from_string(str);
@@ -35,11 +22,12 @@ int main() {
         std::seed_seq seq(std::begin(seed_data), std::end(seed_data));
         std::mt19937 generator(seq);
 
-        uuid const guid = uuids::uuid_random_generator{generator}();
+        uuids::uuid const guid = uuids::uuid_random_generator{generator}();
         assert(!guid.is_nil());
         assert(guid.size() == 16);
         assert(guid.version() == uuids::uuid_version::random_number_based);
         assert(guid.variant() == uuids::uuid_variant::rfc);
     }
 
+    return 0;
 }
