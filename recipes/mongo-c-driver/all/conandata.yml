@@ -20,6 +20,8 @@ patches:
       base_path: "source_subfolder"
     - patch_file: "patches/fix-uninitialized-warning-1.21.2.patch"
       base_path: "source_subfolder"
+    - patch_file: "patches/remove-const-from-resp_data-1.21.2.patch"
+      base_path: "source_subfolder"
   "1.17.6":
     - patch_file: "patches/disable-shared-when-static-1.17.6.patch"
       base_path: "source_subfolder"

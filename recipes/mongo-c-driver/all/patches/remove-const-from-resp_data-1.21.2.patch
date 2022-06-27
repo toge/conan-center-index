@@ -1,0 +1,44 @@
+diff --git a/src/libmongoc/src/mongoc/mongoc-openssl.c b/src/libmongoc/src/mongoc/mongoc-openssl.c
+index d6c1fef..c787d5c 100644
+--- a/src/libmongoc/src/mongoc/mongoc-openssl.c
++++ b/src/libmongoc/src/mongoc/mongoc-openssl.c
+@@ -664,7 +664,7 @@ _contact_ocsp_responder (OCSP_CERTID *id,
+    STACK_OF (OPENSSL_STRING) *url_stack = NULL;
+    OPENSSL_STRING url = NULL, host = NULL, path = NULL, port = NULL;
+    OCSP_REQUEST *req = NULL;
+-   const unsigned char *resp_data;
++   unsigned char *resp_data;
+    OCSP_RESPONSE *resp = NULL;
+    int i, ssl;
+ 
+@@ -728,10 +728,10 @@ _contact_ocsp_responder (OCSP_CERTID *id,
+          GOTO (retry);
+       }
+ 
+-      resp_data = (const unsigned char *) http_res.body;
++      resp_data = (unsigned char *) http_res.body;
+ 
+       if (http_res.body_len == 0 ||
+-          !d2i_OCSP_RESPONSE (&resp, &resp_data, http_res.body_len)) {
++          !d2i_OCSP_RESPONSE (&resp, (const unsigned char**)&resp_data, http_res.body_len)) {
+          MONGOC_DEBUG ("Could not parse OCSP response from HTTP response");
+          MONGOC_DEBUG ("Response headers: %s", http_res.headers);
+          GOTO (retry);
+@@ -774,7 +774,7 @@ _mongoc_ocsp_tlsext_status (SSL *ssl, mongoc_openssl_ocsp_opt_t *opts)
+    X509_STORE *store = NULL;
+    X509 *peer = NULL, *issuer = NULL;
+    STACK_OF (X509) *cert_chain = NULL;
+-   const unsigned char *resp_data = NULL;
++   unsigned char *resp_data = NULL;
+    int cert_status, reason, len, status;
+    OCSP_CERTID *id = NULL;
+    ASN1_GENERALIZEDTIME *produced_at = NULL, *this_update = NULL,
+@@ -821,7 +821,7 @@ _mongoc_ocsp_tlsext_status (SSL *ssl, mongoc_openssl_ocsp_opt_t *opts)
+    stapled_response = !!resp_data;
+    if (stapled_response) {
+       /* obtain an OCSP_RESPONSE object from the OCSP response */
+-      if (!d2i_OCSP_RESPONSE (&resp, &resp_data, len)) {
++      if (!d2i_OCSP_RESPONSE (&resp, (const unsigned char**)&resp_data, len)) {
+          MONGOC_ERROR ("Failed to parse OCSP response");
+          ret = OCSP_CB_ERROR;
+          GOTO (done);
