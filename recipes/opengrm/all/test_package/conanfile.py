@@ -1,20 +1,18 @@
-from conan import ConanFile
-from conan.tools.build import cross_building
-from conans import CMake
+# pylint: skip-file
 import os
+from conans import ConanFile, CMake, tools
 
 
 class TestPackageConan(ConanFile):
     settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "pkg_config"
+    generators = "cmake", "cmake_find_package_multi"
 
     def build(self):
-        self.run("pkg-config --validate ./uuid.pc")
         cmake = CMake(self)
         cmake.configure()
         cmake.build()
 
     def test(self):
-        if not cross_building(self):
+        if not tools.cross_building(self):
             bin_path = os.path.join("bin", "test_package")
             self.run(bin_path, run_environment=True)
