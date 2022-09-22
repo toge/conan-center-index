@@ -81,7 +81,7 @@ class C4CoreConan(ConanFile):
         cmake.build()
 
     def package(self):
-        self.copy(pattern="LICENSE*", dst="licenses", src=self.source_folder)
+        copy(self, pattern="LICENSE*", dst=os.path.join(self.package_folder, "licenses"), src=self.source_folder)
         cmake = CMake(self)
         cmake.install()
         rmdir(self, os.path.join(self.package_folder, "cmake"))
