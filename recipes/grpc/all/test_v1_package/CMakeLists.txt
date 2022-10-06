@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 3.12)
 project(test_package)
 
+include(${CMAKE_BINARY_DIR}/conanbuildinfo.cmake)
+conan_basic_setup(TARGETS)
+
 find_package(protobuf CONFIG REQUIRED)
 find_package(gRPC CONFIG REQUIRED)
 
