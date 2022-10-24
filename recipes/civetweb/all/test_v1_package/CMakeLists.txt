@@ -7,4 +7,4 @@ conan_basic_setup(TARGETS)
 find_package(civetweb CONFIG REQUIRED)
 
 add_executable(${PROJECT_NAME} test_package.cpp)
-target_link_libraries(${PROJECT_NAME} civetweb::civetweb)
+target_link_libraries(${PROJECT_NAME} PRIVATE civetweb::civetweb)
