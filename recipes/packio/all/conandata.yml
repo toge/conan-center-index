@@ -37,11 +37,6 @@ sources:
     sha256: "873ebd2ce8c8dbf8a4e7b777b1aa735fe4da3863131a5d6c938e339ee7e0a4d1"
 
 patches:
-  "2.3.0":
-    - patch_file: "patches/2.1.0-0001-fix-boost-json-hash-conflict.patch"
-      patch_description: "fix compilation error caused by boost json hash function conflict"
-      patch_type: "backport"
-      patch_source: "https://github.com/qchateau/packio/commit/d1e0b30378ccafc96da039cf5fc9ffa754e4c2fe"
   "2.2.0":
     - patch_file: "patches/2.1.0-0001-fix-boost-json-hash-conflict.patch"
       patch_description: "fix compilation error caused by boost json hash function conflict"
@@ -52,4 +47,3 @@ patches:
       patch_description: "fix compilation error caused by boost json hash function conflict"
       patch_type: "backport"
       patch_source: "https://github.com/qchateau/packio/commit/d1e0b30378ccafc96da039cf5fc9ffa754e4c2fe"
-

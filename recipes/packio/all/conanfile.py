@@ -61,7 +61,7 @@ class PackioConan(ConanFile):
 
     def requirements(self):
         if self.options.get_safe("msgpack") or Version(self.version) < "2.0.0":
-            self.requires("msgpack/3.2.1")
+            self.requires("msgpack/3.3.0")
 
         if self.options.get_safe("nlohmann_json"):
             self.requires("nlohmann_json/3.9.1")

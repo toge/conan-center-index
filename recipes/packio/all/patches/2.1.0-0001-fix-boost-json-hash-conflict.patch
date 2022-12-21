@@ -1,36 +1,24 @@
-diff --git a/include/packio/internal/config.h b/include/packio/internal/config.h
-index e21cf70..61f902b 100644
---- a/include/packio/internal/config.h
-+++ b/include/packio/internal/config.h
-@@ -82,7 +82,7 @@ using error_code = std::error_code;
- using system_error = std::system_error;
- using error_category = std::error_category;
- #else // defined(PACKIO_STANDALONE_ASIO)
--namespace net = ::boost::asio;
-+namespace net = boost::asio;
- using error_code = boost::system::error_code;
- using system_error = boost::system::system_error;
- using error_category = boost::system::error_category;
 diff --git a/include/packio/json_rpc/hash.h b/include/packio/json_rpc/hash.h
-index 9f6e3dd..0032374 100644
+index 9f6e3dd..664696d 100644
 --- a/include/packio/json_rpc/hash.h
 +++ b/include/packio/json_rpc/hash.h
-@@ -6,11 +6,14 @@
+@@ -6,11 +6,15 @@
  #define PACKIO_JSON_RPC_HASH_H
  
  #include <boost/json.hpp>
 +#include <boost/version.hpp>
++
++#if BOOST_VERSION < 107700
  
  namespace packio {
  namespace json_rpc {
  namespace internal {
  
-+#if BOOST_VERSION < 107700
 +
  inline std::size_t combine(std::size_t seed, std::size_t h) noexcept
  {
      seed ^= h + 0x9e3779b9 + (seed << 6U) + (seed >> 2U);
-@@ -72,4 +75,6 @@ struct hash<boost::json::value> {
+@@ -72,4 +76,6 @@ struct hash<boost::json::value> {
  
  } // std
  
