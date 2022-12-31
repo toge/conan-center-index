@@ -75,7 +75,7 @@ class PodofoConan(ConanFile):
         if self.options.with_tiff:
             self.requires("libtiff/4.4.0")
         if self.options.with_png:
-            self.requires("libpng/1.6.38")
+            self.requires("libpng/1.6.39")
         if self.options.with_unistring:
             self.requires("libunistring/0.9.10")
 
