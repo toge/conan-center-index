@@ -1,25 +1,32 @@
-from conans import ConanFile, CMake, tools
-from conans.errors import ConanInvalidConfiguration
+from conan import ConanFile
+from conan.errors import ConanInvalidConfiguration
+from conan.tools.build import check_min_cppstd, cross_building
+from conan.tools.cmake import CMake, CMakeDeps, CMakeToolchain, cmake_layout
+from conan.tools.env import VirtualBuildEnv
+from conan.tools.files import apply_conandata_patches, copy, export_conandata_patches, get, replace_in_file, rm, rmdir
+from conan.tools.microsoft import check_min_vs, is_msvc, is_msvc_static_runtime
+from conan.tools.scm import Version
 import os
+
+required_conan_version = ">=1.53.0"
 
 class NcbiCxxToolkit(ConanFile):
     name = "ncbi-cxx-toolkit-public"
     license = "CC0-1.0"
-    homepage = "https://ncbi.github.io/cxx-toolkit"
-    url = "https://github.com/conan-io/conan-center-index"
     description = "NCBI C++ Toolkit -- a cross-platform application framework and a collection of libraries for working with biological data."
+    url = "https://github.com/conan-io/conan-center-index"
+    homepage = "https://ncbi.github.io/cxx-toolkit"
     topics = ("ncbi", "biotechnology", "bioinformatics", "genbank", "gene",
               "genome", "genetic", "sequence", "alignment", "blast",
               "biological", "toolkit", "c++")
-    settings = "os", "compiler", "build_type", "arch"
-    generators = "cmake", "cmake_find_package"
+    package_type = "library"
+    settings = "os", "arch", "compiler", "build_type"
     short_paths = True
-
     options = {
         "shared":     [True, False],
         "fPIC":       [True, False],
-        "with_projects": "ANY",
-        "with_targets":  "ANY"
+        "with_projects": ["ANY"],
+        "with_targets":  ["ANY"],
     }
     default_options = {
         "shared":     False,
@@ -32,28 +39,40 @@ class NcbiCxxToolkit(ConanFile):
         "BZ2":          "bzip2/1.0.8",
         "CASSANDRA":    "cassandra-cpp-driver/2.15.3",
         "GIF":          "giflib/5.2.1",
-        "JPEG":         "libjpeg/9d",
+        "JPEG":         "libjpeg/9e",
         "LMDB":         "lmdb/0.9.29",
         "LZO":          "lzo/2.10",
-        "MySQL":        "libmysqlclient/8.0.25",
+        "MySQL":        "libmysqlclient/8.1.0",
         "NGHTTP2":      "libnghttp2/1.46.0",
         "PCRE":         "pcre/8.45",
         "PNG":          "libpng/1.6.37",
         "SQLITE3":      "sqlite3/3.37.2",
         "TIFF":         "libtiff/4.3.0",
-        "XML":          "libxml2/2.9.12",
+        "XML":          "libxml2/2.11.6",
         "XSLT":         "libxslt/1.1.34",
         "UV":           "libuv/1.42.0",
-        "Z":            "zlib/1.2.11",
-        "OpenSSL":      "openssl/1.1.1l",
-        "ZSTD":         "zstd/1.5.2"
+        "Z":            "zlib/[>=1.2.11 <2]",
+        "OpenSSL":      "openssl/[>=1.1 <4]",
+        "ZSTD":         "zstd/1.5.5"
     }
 
-#----------------------------------------------------------------------------
+    @property
+    def _min_cppstd(self):
+        return 17
+
+    @property
+    def _compilers_minimum_version(self):
+        return {
+            "gcc": "8",
+            "clang": "7",
+            "apple-clang": "12",
+            "Visual Studio": "16",
+            "msvc": "192",
+        }
+
     def _get_RequiresMapKeys(self):
         return self.NCBI_to_Conan_requires.keys()
 
-#----------------------------------------------------------------------------
     def _translate_ReqKey(self, key):
         if key in self.NCBI_to_Conan_requires.keys():
             if key == "BerkeleyDB" and self.settings.os == "Windows":
@@ -65,45 +84,17 @@ class NcbiCxxToolkit(ConanFile):
             return self.NCBI_to_Conan_requires[key]
         return None
 
-#----------------------------------------------------------------------------
-    @property
-    def _source_subfolder(self):
-        return "src"
-
-#----------------------------------------------------------------------------
-    def _configure_cmake(self):
-        cmake = CMake(self)
-        cmake.definitions["NCBI_PTBCFG_PACKAGING"] = "TRUE"
-        if self.options.with_projects != "":
-            cmake.definitions["NCBI_PTBCFG_PROJECT_LIST"] = self.options.with_projects
-        if self.options.with_targets != "":
-            cmake.definitions["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.with_targets
-        return cmake
-
-#----------------------------------------------------------------------------
-    def validate(self):
-        if self.settings.compiler.get_safe("cppstd"):
-            tools.check_min_cppstd(self, 17)
-        if self.settings.os not in ["Linux", "Macos", "Windows"]:   
-            raise ConanInvalidConfiguration("This operating system is not supported")
-        if self.settings.compiler == "Visual Studio" and tools.Version(self.settings.compiler.version) < "16":
-            raise ConanInvalidConfiguration("This version of Visual Studio is not supported")
-        if self.settings.compiler == "Visual Studio" and self.options.shared and "MT" in self.settings.compiler.runtime:
-            raise ConanInvalidConfiguration("This configuration is not supported")
-        if self.settings.compiler == "gcc" and tools.Version(self.settings.compiler.version) < "7":
-            raise ConanInvalidConfiguration("This version of GCC is not supported")
-        if hasattr(self, "settings_build") and tools.cross_building(self, skip_x64_x86=True):
-            raise ConanInvalidConfiguration("Cross compilation is not supported")
-
     def config_options(self):
         if self.settings.os == "Windows":
             del self.options.fPIC
 
     def configure(self):
         if self.options.shared:
-            del self.options.fPIC
+            self.options.rm_safe("fPIC")
 
-#----------------------------------------------------------------------------
+    def layout(self):
+        cmake_layout(self, src_folder="src")
+
     def requirements(self):
         NCBIreqs = self._get_RequiresMapKeys()
         for req in NCBIreqs:
@@ -111,25 +102,37 @@ class NcbiCxxToolkit(ConanFile):
             if pkg is not None:
                 self.requires(pkg)
 
-#----------------------------------------------------------------------------
-    def source(self):
-        tools.get(**self.conan_data["sources"][self.version], strip_root = True)
+    def validate(self):
+        if self.settings.compiler.get_safe("cppstd"):
+            check_min_cppstd(self, self._min_cppstd)
+        if self.settings.os not in ["Linux", "Macos", "Windows"]:   
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support this operating system.")
+        if is_msvc(self) and self.options.shared and "MT" in self.settings.compiler.runtime:
+            raise ConanInvalidConfiguration(f"{self.ref} doesn't support MT runtime with Visual Studio.")
+        if hasattr(self, "settings_build") and cross_building(self, skip_x64_x86=True):
+            raise ConanInvalidConfiguration("Cross compilation is not supported")
 
-#----------------------------------------------------------------------------
+    def source(self):
+        get(**self.conan_data["sources"][self.version], strip_root = True)
+
+    def generate(self):
+        tc = CMakeToolchain(self)
+        tc.definitions["NCBI_PTBCFG_PACKAGING"] = "TRUE"
+        if self.options.with_projects != "":
+            tc.definitions["NCBI_PTBCFG_PROJECT_LIST"] = self.options.with_projects
+        if self.options.with_targets != "":
+            tc.definitions["NCBI_PTBCFG_PROJECT_TARGETS"] = self.options.with_targets
+
     def build(self):
-        cmake = self._configure_cmake()
-        cmake.configure(source_folder=self._source_subfolder)
-# Visual Studio sometimes runs "out of heap space"
-        if self.settings.compiler == "Visual Studio":
-            cmake.parallel = False
+        cmake = CMake(self)
+        cmake.configure()
         cmake.build()
 
-#----------------------------------------------------------------------------
     def package(self):
-        cmake = self._configure_cmake()
+        copy(self, "LICENSE.md", self.source_folder, os.path.join(self.package_folder, "licenses"))
+        cmake = CMake(self)
         cmake.install()
 
-#----------------------------------------------------------------------------
     def package_info(self):
         if self.settings.os == "Windows":
             self.cpp_info.components["ORIGLIBS"].system_libs = ["ws2_32", "dbghelp"]
