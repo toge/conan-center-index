@@ -30,7 +30,7 @@ class GlazeConan(ConanFile):
             "msvc": "193",
             "gcc": "11" if Version(self.version) < "2.6.3" else "12",
             # glaze >= 2.1.6 uses std::bit_cast which is supported by clang >= 14
-            "clang": "12" if Version(self.version) < "2.1.6" else "14",
+            "clang": "14",
             "apple-clang": "13.1",
         }
 
@@ -41,8 +41,7 @@ class GlazeConan(ConanFile):
         self.info.clear()
 
     def validate(self):
-        if Version(self.version) >= "2.1.4" and \
-            self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "11.3":
+        if self.settings.compiler == "gcc" and Version(self.settings.compiler.version) < "11.3":
             raise ConanInvalidConfiguration(
                 f"{self.ref} doesn't support 11.0<=gcc<11.3 due to gcc bug. Please use gcc>=11.3 and set compiler.version.(ex. compiler.version=11.3)",
             )
