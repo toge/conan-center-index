@@ -1,4 +1,8 @@
 versions:
+  "1.91.4":
+    folder: all
+  "1.91.4-docking":
+    folder: all
   "1.91.3":
     folder: all
   "1.91.3-docking":
@@ -15,32 +19,20 @@ versions:
     folder: all
   "1.90.9-docking":
     folder: all
-  "1.90.8":
-    folder: all
-  "1.90.8-docking":
-    folder: all
-  "1.90.7":
-    folder: all
-  "1.90.7-docking":
-    folder: all
-  "1.90.6":
-    folder: all
-  "1.90.6-docking":
-    folder: all
+  # keep 1.90.5 for imguizmo, implot
   "1.90.5":
     folder: all
   "1.90.5-docking":
     folder: all
-  "1.89.9":
-    folder: all
-  "1.89.9-docking":
-    folder: all
+  # keep 1.88 for implot
   "1.88":
     folder: all
+  # keep 1.87 for magnum-integration, diligent-tools
   "1.87":
     folder: all
+  # keep 1.86 for implot
   "1.86":
     folder: all
+  # keep 1.85 for diligent-tools
   "1.85":
     folder: all
-
